@@ -18,7 +18,8 @@
           <el-button size="small" type="primary">全部展开</el-button>
           <el-button size="small" type="primary">全部压缩</el-button>
         </div>
-        <el-tree class="treeclass" ref="tree" :data="treeData" default-expand-all="" :props="defaultProps" @node-click="nodeclick" @check-change="handleClick" check-strictly node-key="id" show-checkbox></el-tree>
+        <el-tree class="treeclass" ref="tree" :data="treeData" default-expand-all="" :props="defaultProps"
+                 @node-click="nodeclick" @check-change="handleClick" check-strictly node-key="id" show-checkbox></el-tree>
       </el-col>
       <el-col :span="18">
         <div class="mod-btnbox">
@@ -88,6 +89,7 @@ export default {
       },
       // rules表单验证
       rules: {
+        //暂时注释一下。要不没法完成简单的测试
         parentId: [
           { required: true, message: '请选择父级菜单', trigger: 'blur' }
         ],
@@ -122,78 +124,58 @@ export default {
     getdata() {
       ModuleList()
         .then(res => {
-          this.treeData = [
-            {
-              id: 1,
-              pId: 0,
-              name: '平台顶级',
-              open: true,
-              checked: false
-            },
-            {
-              id: 2,
-              pId: 1,
-              name: '一层',
-              open: true,
-              checked: false
-            },
-            {
-              id: 3,
-              pId: 1,
-              name: '一层',
-              open: true,
-              checked: false
-            },
-            {
-              id: 12,
-              pId: 1,
-              name: '一层',
-              open: true,
-              checked: false
-            },
-            {
-              id: 13,
-              pId: 1,
-              name: '一层',
-              open: true,
-              checked: false
-            },
-            {
-              id: 17,
-              pId: 1,
-              name: '一层',
-              open: true,
-              checked: false
-            },
-            {
-              id: 4,
-              pId: 2,
-              name: '一层',
-              open: true,
-              checked: false
-            },
-            {
-              id: 5,
-              pId: 2,
-              name: '一层',
-              open: true,
-              checked: false
-            },
-            {
-              id: 6,
-              pId: 2,
-              name: '一层',
-              open: true,
-              checked: false
-            },
-            {
-              id: 7,
-              pId: 2,
-              name: '一层',
-              open: true,
-              checked: false
-            }
-          ]
+          // this.treeData= [{
+          //   id: 1,
+          //   name: '一级 1',
+          //   children: [{
+          //     id: 4,
+          //     name: '二级 1-1',
+          //     children: [{
+          //       id: 9,
+          //       name: '三级 1-1-1'
+          //     }, {
+          //       id: 10,
+          //       name: '三级 1-1-2'
+          //     }]
+          //   }]
+          // }, {
+          //   id: 2,
+          //   name: '一级 2',
+          //   children: [{
+          //     id: 5,
+          //     name: '二级 2-1'
+          //   }, {
+          //     id: 6,
+          //     name: '二级 2-2'
+          //   }]
+          // }, {
+          //   id: 3,
+          //   label: '一级 3',
+          //   children: [{
+          //     id: 7,
+          //     name: '二级 3-1'
+          //   }, {
+          //     id: 8,
+          //     name: '二级 3-2'
+          //   }]
+          // }]
+          this.treeData=res.data
+          // this.treeData = [
+          //   {
+          //     id: 1,
+          //     pId: 0,
+          //     name: '平台顶级',
+          //     open: true,
+          //     checked: true
+          //   },
+          //   {
+          //     id: 7,
+          //     pId: 2,
+          //     name: '一层',
+          //     open: true,
+          //     checked: false
+          //   }
+          // ]
         })
         .catch(err => {
           this.loading = false
@@ -280,12 +262,14 @@ export default {
         .then(res => {
           this.getdata()
           this.getmenu()
+          this.form={}
           this.$message.error('菜单管理列表删除成功！')
         })
         .catch(err => {
           this.$message.error('菜单管理列表删除失败，请稍后再试！')
         })
     }
+
   }
 }
 </script>
@@ -327,5 +311,4 @@ export default {
   width: 100%;
 }
 </style>
- 
- 
+

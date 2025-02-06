@@ -11,6 +11,7 @@ export const GoodsSave = (params) => { return req("post", "/api/Goods/save", par
 // 商品管理-删除商品管理
 export const GoodsDelete = (params) => { return axios.delete("/api/Goods/delete?ids=" + params + "&token=" + localStorage.getItem('logintoken')).then(res => res.data) };
 
+
 /**
  * 机器信息管理 
  **/

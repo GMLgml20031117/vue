@@ -106,8 +106,10 @@ export default {
               setTimeout(() => {
                 console.log("开始进行页面跳转处理")
                 this.logining = false
-                // 缓存token，暂时缓存token信息，以后还需要诚信弄
-                // localStorage.setItem('logintoken', res.data.token)
+                console.log(res.token)
+
+                // 缓存token，暂时缓存token信息
+                 localStorage.setItem('logintoken', res.token)
                 // 缓存用户个人信息
                 localStorage.setItem('userdata', JSON.stringify(res.data))
                 this.$store.commit('login', 'true')

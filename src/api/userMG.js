@@ -2,7 +2,7 @@ import axios from 'axios';
 import { loginreq, req } from './axiosFun';
 
 // 登录接口
-export const login = (params) => { return loginreq("post", "http://localhost:8080/user/login", params) };
+export const login = (params) => { return loginreq("post", "/api/User/login", params) };
 // 获取用户菜单
 export const menu = (params) => { return axios.get("/api/menu?&token=" + localStorage.getItem('logintoken')).then(res => res.data) };
 // 退出接口
@@ -11,6 +11,10 @@ export const loginout = () => { return axios.delete("/api/login?&token=" + local
 /**
  * 用户管理
  **/
+//用户管理-获取公司部门列表
+export const userDept = (params) => { return axios.get("/api/User/dept" + "?token=" + localStorage.getItem('logintoken'))   };
+//用户管理-获取用户角色列表
+export const userRole = (params) => { return axios.get("/api/User/role" + "?token=" + localStorage.getItem('logintoken'))   };
 // 用户管理-获取用户列表
 export const userList = (params) => { return req("post", "/api/User/list", params) };
 // 用户管理-保存（添加编辑）

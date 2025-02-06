@@ -118,8 +118,8 @@ export default {
       formInline: {
         page: 1,
         limit: 10,
-        varLable: '',
-        varName: '',
+        roleNo: '',
+        roleName: '',
         token: localStorage.getItem('logintoken')
       },
       // 删除
@@ -172,105 +172,30 @@ export default {
   methods: {
     // 获取角色列表
     getdata(parameter) {
-      // 模拟数据
-      let res = {
-        code: 0,
-        msg: null,
-        count: 6,
-        data: [
-          {
-            addUser: 'root',
-            editUser: 'root',
-            addTime: 1519182004000,
-            editTime: 1520288426000,
-            roleId: 1,
-            systemNo: 'pmd',
-            roleNo: 'Administrator',
-            roleName: '超级管理员'
-          },
-          {
-            addUser: null,
-            editUser: null,
-            addTime: 1521111376000,
-            editTime: 1520678191000,
-            roleId: 2,
-            systemNo: 'order',
-            roleNo: 'admin',
-            roleName: '公司管理员'
-          },
-          {
-            addUser: null,
-            editUser: null,
-            addTime: 1520678221000,
-            editTime: 1520678221000,
-            roleId: 95,
-            systemNo: 'pm',
-            roleNo: 'common',
-            roleName: '普通用户'
-          },
-          {
-            addUser: null,
-            editUser: null,
-            addTime: 1526349853000,
-            editTime: 1526349853000,
-            roleId: 96,
-            systemNo: '1',
-            roleNo: '1',
-            roleName: '1'
-          },
-          {
-            addUser: null,
-            editUser: null,
-            addTime: 1526349942000,
-            editTime: 1526437443000,
-            roleId: 97,
-            systemNo: '2',
-            roleNo: '2',
-            roleName: '2'
-          },
-          {
-            addUser: null,
-            editUser: null,
-            addTime: 1526652148000,
-            editTime: 1526652148000,
-            roleId: 101,
-            systemNo: 'test',
-            roleNo: 'demo',
-            roleName: '演示角色'
-          }
-        ]
-      }
-      this.loading = false
-      this.listData = res.data
-      // 分页赋值
-      this.pageparm.currentPage = this.formInline.page
-      this.pageparm.pageSize = this.formInline.limit
-      this.pageparm.total = res.count
-      // 模拟数据结束
 
       /***
        * 调用接口，注释上面模拟数据 取消下面注释
        */
-      // roleList(parameter)
-      //   .then(res => {
-      //     this.loading = false
-      //     if (res.success == false) {
-      //       this.$message({
-      //         type: 'info',
-      //         message: res.msg
-      //       })
-      //     } else {
-      //       this.listData = res.data
-      //       // 分页赋值
-      //       this.pageparm.currentPage = this.formInline.page
-      //       this.pageparm.pageSize = this.formInline.limit
-      //       this.pageparm.total = res.count
-      //     }
-      //   })
-      //   .catch(err => {
-      //     this.loading = false
-      //     this.$message.error('获取角色列表失败，请稍后再试！')
-      //   })
+      roleList(parameter)
+        .then(res => {
+          this.loading = false
+          if (res.success == false) {
+            this.$message({
+              type: 'info',
+              message: res.msg
+            })
+          } else {
+            this.listData = res.data.records
+            // 分页赋值
+            this.pageparm.currentPage = this.formInline.page
+            this.pageparm.pageSize = this.formInline.limit
+            this.pageparm.total = res.data.total
+          }
+        })
+        .catch(err => {
+          this.loading = false
+          this.$message.error('获取角色列表失败，请稍后再试！')
+        })
     },
     // 分页插件事件
     callFather(parm) {
@@ -377,6 +302,7 @@ export default {
               message: '获取权限成功'
             })
             this.changemenu(res.data.data)
+            console.log(res.data.data)
             this.RoleRight = this.changeArr(res.data.data)
           } else {
             this.$message({
@@ -402,6 +328,7 @@ export default {
     },
     // tree 递归
     changeArr(list) {
+      console.log(list)
       var temptree = [],
         tree = [],
         items = []
@@ -497,4 +424,3 @@ export default {
 }
 </style>
 
- 
