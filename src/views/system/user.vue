@@ -81,8 +81,8 @@
           <el-input size="small" v-model="editForm.userRealName" auto-complete="off" placeholder="请输入姓名"></el-input>
         </el-form-item>
 
-        <el-form-item label="角色" prop="roleId">
-          <el-select v-model="editForm.roleId" placeholder="请选择" class="userRole">
+        <el-form-item label="角色" prop="roleName">
+          <el-select v-model="editForm.roleName" placeholder="请选择" class="userRole">
             <el-option
               v-for="item in options"
               :key="item.value"
@@ -175,7 +175,7 @@ export default {
         userId: '',
         userName: '',
         userRealName: '',
-        roleId: '',
+        roleName: '',
         userMobile: '',
         userEmail: '',
         userSex: '',
@@ -198,7 +198,9 @@ export default {
         userRealName: [
           { required: true, message: '请输入姓名', trigger: 'blur' }
         ],
-        roleId: [{ required: true, message: '请选择角色', trigger: 'blur' }],
+        roleName: [{ required: true, message: '请选择角色', trigger: 'blur' }],
+        deptName: [{ required: true, message: '请选择部门', trigger: 'blur' }],
+
         userMobile: [
           { required: true, message: '请输入手机号', trigger: 'blur' },
           {
@@ -253,7 +255,7 @@ export default {
       // 选中
       checkmenu: [],
       //参数role
-      saveroleId: '',
+      saveroleName: '',
       // 分页参数
       pageparm: {
         currentPage: 1,
@@ -410,16 +412,17 @@ export default {
         this.editForm.userId = row.userId
         this.editForm.userName = row.userName
         this.editForm.userRealName = row.userRealName
-        this.editForm.roleId = row.roleId
+        this.editForm.roleName = row.roleName
         this.editForm.userMobile = row.userMobile
         this.editForm.userEmail = row.userEmail
         this.editForm.userSex = row.userSex
       } else {
         this.title = '添加用户'
+        this.editForm.id=''
         this.editForm.userId = ''
         this.editForm.userName = ''
         this.editForm.userRealName = ''
-        this.editForm.roleId = ''
+        this.editForm.roleName = ''
         this.editForm.userMobile = ''
         this.editForm.userEmail = ''
         this.editForm.userSex = ''
@@ -610,7 +613,7 @@ export default {
     // 数据权限
     dataAccess: function(index, row) {
       this.dataAccessshow = true
-      this.saveroleId = row.userId
+      this.saveroleName = row.userId
       UserDeptTree(row.userId)
         .then(res => {
           if (res.data.success) {
