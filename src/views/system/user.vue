@@ -85,9 +85,9 @@
           <el-select v-model="editForm.roleName" placeholder="请选择" class="userRole">
             <el-option
               v-for="item in options"
-              :key="item.value"
+              :key="item.label"
               :label="item.label"
-              :value="item.value">
+              :value="item.label">
             </el-option>
           </el-select>
         </el-form-item>
@@ -155,6 +155,7 @@ import {
   UserChangeDept, userRole, userDept
 } from '../../api/userMG'
 import Pagination from '../../components/Pagination'
+import {timestampToTime} from "../../utils/util";
 export default {
   data() {
     return {
@@ -172,7 +173,6 @@ export default {
       // 编辑与添加
       editForm: {
         id:'',
-        userId: '',
         userName: '',
         userRealName: '',
         roleName: '',
@@ -228,7 +228,7 @@ export default {
       },
       // 重置密码
       resetpsd: {
-        userId: '',
+        id: '',
         token: localStorage.getItem('logintoken')
       },
       // 用户下线
@@ -285,6 +285,7 @@ export default {
    * 里面的方法只有被调用才会执行
    */
   methods: {
+    timestampToTime,
     // 获取数据方法
     getdata(parameter) {
       this.loading = true
@@ -325,10 +326,10 @@ export default {
       this.loading = true
       let parm = {
         lock: '',
-        userId: '',
+        id: '',
         token: localStorage.getItem('logintoken')
       }
-      parm.userId = row.userId
+      parm.id = row.id
       let lock = row.isLock
       if (lock == 'N') {
         parm.lock = 'Y'
@@ -409,7 +410,6 @@ export default {
       if (row != undefined && row != 'undefined') {
         this.title = '修改用户'
         this.editForm.id=row.id
-        this.editForm.userId = row.userId
         this.editForm.userName = row.userName
         this.editForm.userRealName = row.userRealName
         this.editForm.roleName = row.roleName
@@ -419,7 +419,6 @@ export default {
       } else {
         this.title = '添加用户'
         this.editForm.id=''
-        this.editForm.userId = ''
         this.editForm.userName = ''
         this.editForm.userRealName = ''
         this.editForm.roleName = ''
@@ -499,7 +498,7 @@ export default {
       let ids = []
       if (len != 0) {
         for (let i = 0; i < len.length; i++) {
-          ids.push(len[i].userId)
+          ids.push(len[i].id)
         }
       }
       this.unitparm.userIds = ids.join(',')
@@ -576,7 +575,7 @@ export default {
     },
     // 重置密码
     resetpwd(index, row) {
-      this.resetpsd.userId = row.userId
+      this.resetpsd.id = row.id
       this.$confirm('确定要重置密码吗?', '信息', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -613,8 +612,8 @@ export default {
     // 数据权限
     dataAccess: function(index, row) {
       this.dataAccessshow = true
-      this.saveroleName = row.userId
-      UserDeptTree(row.userId)
+      this.saveroleName = row.id
+      UserDeptTree(row.id)
         .then(res => {
           if (res.data.success) {
             this.checkmenu = this.changemenu(res.data.data)
@@ -690,7 +689,7 @@ export default {
     // 菜单权限-保存
     menuPermSave() {
       let parm = {
-        userId: this.saveroleId,
+        id: this.saveroleId,
         deptIds: ''
       }
       let node = this.$refs.tree.getCheckedNodes()

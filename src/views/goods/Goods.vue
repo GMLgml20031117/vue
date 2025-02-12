@@ -6,38 +6,95 @@
     <!-- 面包屑导航 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item>商品管理</el-breadcrumb-item>
+      <el-breadcrumb-item>库存管理</el-breadcrumb-item>
     </el-breadcrumb>
+
     <!-- 搜索筛选 -->
     <el-form :inline="true" :model="formInline" class="user-search">
       <el-form-item label="搜索：">
-        <el-input size="small" v-model="formInline.deptName" placeholder="输入部门名称"></el-input>
+        <el-input size="small" v-model="formInline.name" placeholder="输入商品名称"></el-input>
       </el-form-item>
       <el-form-item label="">
-        <el-input size="small" v-model="formInline.deptNo" placeholder="输入部门代码"></el-input>
+        <el-input size="small" v-model="formInline.code" placeholder="输入商品代码"></el-input>
       </el-form-item>
       <el-form-item>
         <el-button size="small" type="primary" icon="el-icon-search" @click="search">搜索</el-button>
         <el-button size="small" type="primary" icon="el-icon-plus" @click="handleEdit()">添加</el-button>
       </el-form-item>
     </el-form>
+
+    <div class="button-container">
+      <el-upload
+        action="/api/ProdDetail/upload"
+        :show-file-list="false"
+        accept=".xlsx,.xls"
+        :before-upload="beforeUpload"
+        :on-success="handleUploadSuccess"
+        :on-error="handleUploadError"
+      >
+        <el-button type="primary">上传 Excel</el-button>
+      </el-upload>
+      <el-button @click="downloadExcel">下载 Excel</el-button>
+
+      <el-button type="danger" @click="imageFormVisible=true">条形码操作</el-button>
+    </div>
+
+
     <!--列表-->
-    <el-table size="small" :data="listData" highlight-current-row v-loading="loading" border element-loading-text="拼命加载中" style="width: 100%;">
+    <el-table
+      size="small"
+      :data="listData"
+      highlight-current-row
+      v-loading="loading"
+      border
+      element-loading-text="拼命加载中"
+      style="width: 100%;"
+      :row-class-name="getRowClassName"
+    >
+
       <el-table-column align="center" type="selection" width="60">
       </el-table-column>
-      <el-table-column sortable prop="deptName" label="部门名称" width="300">
+      <el-table-column sortable prop="alarmValue" label="告警值" width="60">
       </el-table-column>
-      <el-table-column sortable prop="deptNo" label="部门代码" width="300">
+      <el-table-column sortable prop="name" label="货品名称" width="150">
       </el-table-column>
-      <el-table-column sortable prop="editTime" label="修改时间" width="300">
+      <el-table-column sortable prop="inventorySum" label="历史入库总量" width="100">
+      </el-table-column>
+
+      <el-table-column sortable prop="inventoryRemove" label="出库总值" width="100">
+      </el-table-column>
+
+      <el-table-column sortable prop="inventory" label="库存值" width="100">
+      </el-table-column>
+
+      <el-table-column sortable prop="localtion" label="位置" width="150">
+      </el-table-column>
+
+
+      <el-table-column sortable prop="type" label="型号" width="60">
+      </el-table-column>
+
+        <el-table-column
+          prop="img"
+          label="条形码"
+          width="80"
+          sortable>
+          <template slot-scope="scope">
+            <!-- 显示条形码图片 -->
+            <img :src="scope.row.img" alt="条形码" style="width: 80px; height: auto;">
+          </template>
+        </el-table-column>
+
+      <el-table-column sortable prop="editTime" label="修改时间" width="150">
         <template slot-scope="scope">
           <div>{{scope.row.editTime|timestampToTime}}</div>
         </template>
       </el-table-column>
-      <el-table-column sortable prop="editUser" label="修改人" width="300">
+      <el-table-column sortable prop="editUser" label="修改人" width="150">
       </el-table-column>
-      <el-table-column align="center" label="操作" min-width="300">
+      <el-table-column align="center" label="操作" min-width="250">
         <template slot-scope="scope">
+          <el-button size="mini" @click="handleProdEdit(scope.$index, scope.row)">出入库</el-button>
           <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
           <el-button size="mini" type="danger" @click="deleteUser(scope.$index, scope.row)">删除</el-button>
         </template>
@@ -45,53 +102,224 @@
     </el-table>
     <!-- 分页组件 -->
     <Pagination v-bind:child-msg="pageparm" @callFather="callFather"></Pagination>
+
+
+
+
+
+
     <!-- 编辑界面 -->
     <el-dialog :title="title" :visible.sync="editFormVisible" width="30%" @click="closeDialog">
       <el-form label-width="120px" :model="editForm" :rules="rules" ref="editForm">
-        <el-form-item label="部门名称" prop="deptName">
-          <el-input size="small" v-model="editForm.deptName" auto-complete="off" placeholder="请输入部门名称"></el-input>
+
+        <el-form-item label="商品名称" prop="name">
+          <el-input size="small" v-model="editForm.name" auto-complete="off" placeholder="请输入部门名称"></el-input>
         </el-form-item>
-        <el-form-item label="部门代码" prop="deptNo">
-          <el-input size="small" v-model="editForm.deptNo" auto-complete="off" placeholder="请输入部门代码"></el-input>
+        <el-form-item label="商品代码" prop="code">
+          <el-input size="small" v-model="editForm.code" auto-complete="off" placeholder="请输入商品代码"></el-input>
         </el-form-item>
+        <el-form-item label="商品位置" prop="code">
+          <el-input size="small" v-model="editForm.localtion" auto-complete="off" placeholder="请输入商品位置"></el-input>
+        </el-form-item>
+        <el-form-item label="预警值" prop="code">
+          <el-input size="small" v-model="editForm.alarmValue" auto-complete="off" placeholder="请输入商品预警值"></el-input>
+        </el-form-item>
+        <el-form-item label="型号" prop="code">
+          <el-input size="small" v-model="editForm.type" auto-complete="off" placeholder="请输入商品型号"></el-input>
+        </el-form-item>
+
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button size="small" @click="closeDialog">取消</el-button>
         <el-button size="small" type="primary" :loading="loading" class="title" @click="submitForm('editForm')">保存</el-button>
       </div>
     </el-dialog>
-  </div>
-</template>
 
+    <!-- 出库入库 -->
+    <el-dialog :title="title" :visible.sync="prodEditFormVisible" width="30%" @click="closeDialog">
+
+
+      <el-form label-width="120px" :model="prodEditForm" :rules="rules" ref="editForm">
+
+        <el-form-item label="商品名称" prop="name">
+          <el-input size="small" v-model="prodEditForm.name" auto-complete="off" placeholder="部门名称" readonly></el-input>
+        </el-form-item>
+        <el-form-item label="商品代码" prop="code">
+          <el-input size="small" v-model="prodEditForm.code" auto-complete="off" placeholder="商品代码" readonly></el-input>
+        </el-form-item>
+        <el-form-item label="类型" prop="inOrOut">
+          <el-radio v-model="prodEditForm.inOrOut" label="入库" value="1">入库</el-radio>
+          <el-radio v-model="prodEditForm.inOrOut" label="出库" value="2">出库</el-radio>
+        </el-form-item>
+
+        <el-form-item label="数目" prop="num">
+          <el-input size="small" v-model="prodEditForm.num" auto-complete="off" placeholder="请输入商品数目"></el-input>
+        </el-form-item>
+        <el-form-item label="出库用途" prop="purpose">
+          <el-input size="small" v-model="prodEditForm.purpose" auto-complete="off" placeholder="请输入出库目的"></el-input>
+        </el-form-item>
+        <el-form-item label="备注" prop="remark">
+          <el-input size="small" v-model="prodEditForm.remark" auto-complete="off" placeholder="备注"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button size="small" @click="prodEditFormVisible=false">取消</el-button>
+        <el-button size="small" type="primary" :loading="loading" class="title" @click="submitProdForm('editForm')">保存</el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 条形码操作 -->
+    <el-dialog :title="title" :visible.sync="imageFormVisible" width="40%" @click="closeDialog">
+
+
+      <el-form label-width="120px" :model="imageEditForm" :rules="rules" ref="editForm">
+
+        <el-form-item label="图片解析为内容" prop="barcodeResult">
+          <!--    最下面的用来解析url为code数据的-->
+          <el-input
+            v-model="imageUrl"
+            placeholder="输入阿里云图片的URL"
+            style="width: 400px;"
+          ></el-input>
+          <el-button type="primary" @click="parseBarcode" style="margin-left: 20px;">
+            解析条形码
+          </el-button>
+
+          <!-- 显示图片 -->
+          <div v-if="imageUrl">
+            <img :src="imageUrl" alt="条形码图片" style="width: 300px; margin-top: 20px;" />
+          </div>
+
+          <!-- 显示解析结果 -->
+          <el-alert
+            v-if="imageEditForm.barcodeResult"
+            title="解析结果"
+            :description="imageEditForm.barcodeResult"
+            type="success"
+            show-icon
+            style="margin-top: 20px;"
+          ></el-alert>
+        </el-form-item>
+
+
+        <el-form-item label="入库内容" prop="barcodeResult">
+          <el-input size="small" v-model="imageEditForm.barcodeResult" auto-complete="off" placeholder="入库内容"></el-input>
+        </el-form-item>
+        <el-form-item label="类型" prop="inOrOut">
+          <el-radio v-model="imageEditForm.inOrOut" label="入库" value="1">入库</el-radio>
+          <el-radio v-model="imageEditForm.inOrOut" label="出库" value="2">出库</el-radio>
+        </el-form-item>
+
+      </el-form>
+
+
+      <el-table
+        size="small"
+        :data="imageListData"
+        highlight-current-row
+        v-loading="loading"
+      >
+        <el-table-column align="center" type="selection" width="60">
+        </el-table-column>
+        <el-table-column sortable prop="name" label="货品名称" >
+        </el-table-column>
+        <el-table-column sortable prop="num" label="数量" >
+        </el-table-column>
+
+        <el-table-column sortable prop="inOrOut" label="操作类型" >
+        </el-table-column>
+
+      </el-table>
+
+      <div slot="footer" class="dialog-footer">
+        <el-button size="small" @click="closeImage">取消</el-button>
+      </div>
+    </el-dialog>
+
+  </div>
+
+
+
+</template>
 <script>
-import { deptList, deptSave, deptDelete } from '../../api/userMG'
+
+import {
+  prodList,
+  prodSave,
+  prodDelete,
+  prodDownload,
+  prodDetailSave,
+  ulrParse,
+  sendDataToBackend
+} from '../../api/prodMG'
 import Pagination from '../../components/Pagination'
+import {timestampToTime} from "../../utils/util";
 export default {
   data() {
     return {
+      imageListData:[
+      ],
+
+      imageFormVisible:false,
+      imageEditForm:{
+        barcodeResult: '',
+        inOrOut: '',
+        remark:'条形码出入扫描',
+        localtion:'1号库房2号货架（默认位置）',
+
+      },
+
+
+
+      imageUrl: '',       // 输入的图片URL
+
+
+      // ==== 新增 ====
+      scanCode: '', // 绑定扫码输入框的值
+      scannedItems: [], // 存储已扫描的商品列表
+      prodEditFormVisible:false,
       nshow: true, //switch开启
       fshow: false, //switch关闭
       loading: false, //是显示加载
       editFormVisible: false, //控制编辑页面显示与隐藏
       title: '添加',
+      prodEditForm:{
+        id: '',
+        name: '',
+        code:'',
+        type:'',
+        num:'',
+        purpose:'',
+        remark:'',
+        localtion:'',
+        remain:'',
+        unit:'',
+        inOrOut:'1'
+      },
       editForm: {
-        deptId: '',
-        deptName: '',
-        deptNo: '',
+        id: '',
+        name: '',
+        code: '',
+        unit: '',
+        localtion: '',
+        alarmValue: '',
+        type: '',
+        img: '',
         token: localStorage.getItem('logintoken')
       },
       // rules表单验证
       rules: {
-        deptName: [
+
+        name: [
           { required: true, message: '请输入部门名称', trigger: 'blur' }
         ],
-        deptNo: [{ required: true, message: '请输入部门代码', trigger: 'blur' }]
+        code: [{ required: true, message: '请输入商品代码', trigger: 'blur' }]
       },
       formInline: {
         page: 1,
         limit: 10,
-        varLable: '',
-        varName: '',
+        code: '',
+        name: '',
         token: localStorage.getItem('logintoken')
       },
       // 删除部门
@@ -100,7 +328,7 @@ export default {
         token: localStorage.getItem('logintoken')
       },
       userparm: [], //搜索权限
-      listData: [], //用户数据
+      listData: [], //商品数据
       // 分页参数
       pageparm: {
         currentPage: 1,
@@ -122,103 +350,148 @@ export default {
    */
   created() {
     this.getdata(this.formInline)
+    document.addEventListener('keydown',this.handleKeydown)
+  },
+  beforeDestroy() {
+    // 在组件销毁时移除键盘事件监听
+    document.removeEventListener('keydown', this.handleKeydown);
   },
 
   /**
    * 里面的方法只有被调用才会执行
    */
   methods: {
+    prodDownload,
+    timestampToTime,
+
+    //关闭条形码那个接口
+    closeImage(){
+      this.imageFormVisible=false
+      this.imageListData=[]
+      this.imageUrl=''
+    },
+
+    // 按下回车事件
+    handleKeydown(event) {
+      if (event.key === 'Enter' && this.imageFormVisible === true) {
+
+        sendDataToBackend(this.imageEditForm).then(res => {
+
+          if(res.success===true) {
+
+            console.log(res.data)
+            this.getdata(this.formInline)
+            // 将返回的对象添加进数组，先检查存在不
+            const exist = this.imageListData.find(item => (item.id === res.data.id && item.inOrOut === res.data.inOrOut))
+            if (exist) {
+              console.log("该数据已存在,操作+1")
+              this.$message("该数据已存在,操作+1")
+              exist.num += 1
+            } else {
+              this.imageListData.push(res.data)
+            }
+            this.imageEditForm.barcodeResult = ''
+          }else {
+            this.$message(res.msg)
+          }
+        })
+      }
+    },
+
+    //解析图片内容
+    parseBarcode() {
+      ulrParse(this.imageUrl).then(res=>{
+        this.imageEditForm.barcodeResult=res.data
+        this.$message("图片解析成功")
+      })
+    },
+
+    //下载excel文件
+    async downloadExcel() {
+        try {
+          const response = await this.$axios({
+            method: 'get',
+            url: '/api/ProdDetail/download?token' + localStorage.getItem('logintoken'),
+            responseType: 'blob', // 关键：指定响应类型为二进制流
+          });
+
+          // 从响应头中解析文件名（需后端设置 Content-Disposition）
+          const fileName = this.getFileNameFromHeaders(response.headers);
+
+          // 创建 Blob 对象并触发下载
+          const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', fileName || 'inventory.xlsx'); // 默认文件名
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        } catch (error) {
+          this.$message.error('下载失败');
+          console.error(error);
+        }
+      },
+
+      // 从响应头解析文件名（示例）
+      getFileNameFromHeaders(headers) {
+        const contentDisposition = headers['content-disposition'];
+        if (contentDisposition) {
+          const fileNameMatch = contentDisposition.match(/filename="?(.+?)"?$/);
+          if (fileNameMatch && fileNameMatch[1]) {
+            return decodeURIComponent(fileNameMatch[1]);
+          }
+        }
+        return null;
+      },
+
+    handleUploadSuccess(response, file) {
+      console.log('上传成功', response);
+      this.$message.success('文件上传成功');
+      // 可以在这里处理上传成功的逻辑，例如更新文件列表或显示提示信息
+      // 例如，如果后端返回了文件的 URL，可以将其添加到文件列表中
+      this.fileList.push({ name: file.name, url: response.data.url });
+      this.getdata(this.formInline)
+    },
+    handleUploadError(err, file) {
+      console.error('上传失败', err);
+      this.$message.error(err);
+      this.getdata(this.formInline)
+      // 可以在这里处理上传失败的逻辑，例如显示错误提示
+    },
+    getRowClassName({ row, rowIndex }) {
+      if (row.alarm === 1) {
+        return 'alarm-row'; // 当 alarm 字段等于 1 时，返回自定义类名
+      }
+      return ''; // 默认情况下不添加任何类名
+    },
     // 获取公司列表
     getdata(parameter) {
       this.loading = true
-      // 模拟数据开始
-      let res = {
-        code: 0,
-        msg: null,
-        count: 5,
-        data: [
-          {
-            addUser: null,
-            editUser: null,
-            addTime: 1521062371000,
-            editTime: 1526700200000,
-            deptId: 2,
-            deptName: 'XX分公司',
-            deptNo: '1',
-            parentId: 1
-          },
-          {
-            addUser: null,
-            editUser: null,
-            addTime: 1521063247000,
-            editTime: 1526652291000,
-            deptId: 3,
-            deptName: '上海测试',
-            deptNo: '02',
-            parentId: 1
-          },
-          {
-            addUser: null,
-            editUser: null,
-            addTime: 1526349555000,
-            editTime: 1526349565000,
-            deptId: 12,
-            deptName: '1',
-            deptNo: '11',
-            parentId: 1
-          },
-          {
-            addUser: null,
-            editUser: null,
-            addTime: 1526373178000,
-            editTime: 1526373178000,
-            deptId: 13,
-            deptName: '5',
-            deptNo: '5',
-            parentId: 1
-          },
-          {
-            addUser: null,
-            editUser: null,
-            addTime: 1526453107000,
-            editTime: 1526453107000,
-            deptId: 17,
-            deptName: 'v',
-            deptNo: 'v',
-            parentId: 1
-          }
-        ]
-      }
-      this.loading = false
-      this.listData = res.data
-      this.pageparm.currentPage = this.formInline.page
-      this.pageparm.pageSize = this.formInline.limit
-      this.pageparm.total = res.count
-      // 模拟数据结束
-
       /***
        * 调用接口，注释上面模拟数据 取消下面注释
        */
-      // deptList(parameter)
-      //   .then(res => {
-      //     this.loading = false
-      //     if (res.success == false) {
-      //       this.$message({
-      //         type: 'info',
-      //         message: res.msg
-      //       })
-      //     } else {
-      //       this.listData = res.data
-      //       // 分页赋值
-      //       this.pageparm.currentPage = this.formInline.page
-      //       this.pageparm.pageSize = this.formInline.limit
-      //       this.pageparm.total = res.count
-      //     }
-      //   })
-      //   .catch(err => {
-      //     this.loading = false
-      //     this.$message.error('菜单加载失败，请稍后再试！')
-      //   })
+      prodList(parameter)
+        .then(res => {
+          this.loading = false
+          if (res.success == false) {
+            this.$message({
+              type: 'info',
+              message: res.msg
+            })
+          } else {
+            this.listData = res.data.records
+            // 分页赋值
+            this.pageparm.currentPage = this.formInline.page
+            this.pageparm.pageSize = this.formInline.limit
+            this.pageparm.total = res.data.total
+          }
+        })
+        .catch(err => {
+          this.loading = false
+          this.$message.error('菜单加载失败，请稍后再试！')
+        })
     },
     // 分页插件事件
     callFather(parm) {
@@ -235,21 +508,82 @@ export default {
       this.editFormVisible = true
       if (row != undefined && row != 'undefined') {
         this.title = '修改'
-        this.editForm.deptId = row.deptId
-        this.editForm.deptName = row.deptName
-        this.editForm.deptNo = row.deptNo
+        this.editForm.id = row.id
+        this.editForm.name = row.name
+        this.editForm.code = row.code
+        this.editForm.unit=row.unit
+
+        this.editForm.type = row.type
+        this.editForm.localtion=row.localtion
+        this.editForm.alarmValue=row.alarmValue
+
       } else {
         this.title = '添加'
-        this.editForm.deptId = ''
-        this.editForm.deptName = ''
-        this.editForm.deptNo = ''
+        this.editForm.id = ''
+        this.editForm.name = ''
+        this.editForm.code = ''
+        this.editForm.img =''
+        this.editForm.alarmValue=''
+        this.editForm.type=''
+        this.editForm.unit=''
+        this.editForm.localtion=''
       }
     },
+    //显示出入库界面
+    handleProdEdit: function(index, row) {
+      this.prodEditFormVisible = true
+      this.prodEditForm.id = row.id
+      this.prodEditForm.name = row.name
+      this.prodEditForm.code = row.code
+      this.prodEditForm.unit = row.unit
+      this.prodEditForm.localtion = row.localtion
+      this.prodEditForm.type=row.type
+      this.prodEditForm.remain=row.inventory
+      this.prodEditForm.num=''
+      this.prodEditForm.purpose=''
+      this.prodEditForm.remark=''
+      this.prodEditForm.inOrOut=''
+    },
+    // 出入库操作
+    submitProdForm(editData) {
+      this.$refs[editData].validate(valid => {
+        if (valid) {
+          prodDetailSave(this.prodEditForm)
+            .then(res => {
+              this.prodEditFormVisible = false
+              this.loading = false
+              if (res.success) {
+                this.getdata(this.formInline)
+                this.$message({
+                  type: 'success',
+                  message: '库存信息保存成功！'
+                })
+                this.scannedItems = []; // 清空列表
+              } else {
+                this.getdata(this.formInline)
+                this.$message({
+                  type: 'info',
+                  message: res.msg
+                })
+              }
+            })
+            .catch(err => {
+              this.getdata(this.formInline)
+              this.editFormVisible = false
+              this.loading = false
+              this.$message.error('保存失败，请稍后重试！')
+            })
+        } else {
+          return false
+        }
+      })
+    },
+
     // 编辑、增加页面保存方法
     submitForm(editData) {
       this.$refs[editData].validate(valid => {
         if (valid) {
-          deptSave(this.editForm)
+          prodSave(this.editForm)
             .then(res => {
               this.editFormVisible = false
               this.loading = false
@@ -284,7 +618,7 @@ export default {
         type: 'warning'
       })
         .then(() => {
-          deptDelete(row.deptId)
+          prodDelete(row.id)
             .then(res => {
               if (res.success) {
                 this.$message({
@@ -314,6 +648,8 @@ export default {
     // 关闭编辑、增加弹出框
     closeDialog() {
       this.editFormVisible = false
+      this.scannedItems = [];
+      this.scanCode = '';
     }
   }
 }
@@ -326,7 +662,17 @@ export default {
 .userRole {
   width: 100%;
 }
+/* 强制覆盖表格行样式 */
+.el-table >>> .alarm-row td {
+  background-color: #ffe58f !important;
+}
+.button-container {
+  position: absolute; /* 或者使用 fixed */
+  top: 100px; /* 距离顶部的距离 */
+  right: 20px; /* 距离右侧的距离 */
+  display: flex;
+  gap: 10px; /* 按钮之间的间距 */
+}
 </style>
 
- 
- 
+
