@@ -28,7 +28,6 @@
         action="/api/ProdDetail/upload"
         :show-file-list="false"
         accept=".xlsx,.xls"
-        :before-upload="beforeUpload"
         :on-success="handleUploadSuccess"
         :on-error="handleUploadError"
       >
@@ -77,13 +76,30 @@
         <el-table-column
           prop="img"
           label="条形码"
-          width="80"
+          width="90"
           sortable>
           <template slot-scope="scope">
             <!-- 显示条形码图片 -->
             <img :src="scope.row.img" alt="条形码" style="width: 80px; height: auto;">
           </template>
         </el-table-column>
+
+      <el-table-column
+        prop="prodImg"
+        label="产品图片"
+        width="120"
+        sortable>
+        <template slot-scope="scope">
+          <!-- 点击图片时，显示大图 -->
+          <img
+            :src="scope.row.prodImg"
+            alt="产品图片"
+            style="width: 100px; height: auto; cursor: pointer;"
+            @click="showLargeImage(scope.row.prodImg)"
+          />
+        </template>
+
+      </el-table-column>
 
       <el-table-column sortable prop="editTime" label="修改时间" width="150">
         <template slot-scope="scope">
@@ -121,6 +137,37 @@
         <el-form-item label="商品位置" prop="code">
           <el-input size="small" v-model="editForm.localtion" auto-complete="off" placeholder="请输入商品位置"></el-input>
         </el-form-item>
+<!--        上传图片-->
+        <el-form-item label="产品图片" prop="prodImg">
+          <input
+            type="file"
+            ref="fileInput"
+            accept="image/*"
+            style="display: none"
+            @change="uploadImage"
+          />
+          <div v-if="!editForm.prodImg" class="upload-button" @click="triggerUpload">
+            +
+          </div>
+          <div v-else class="upload-button" style="position: relative;">
+            <img
+              :src="editForm.prodImg"
+              alt="上传图片"
+              style="width: 100%; height: 100%;"
+              @click="isModalVisible=true"
+            />
+            <button class="my-button"
+                    v-if="editForm.prodImg"
+                    @click="deleteImage">
+              X
+            </button>
+          </div>
+          <!-- 大图弹窗 -->
+          <div v-if="isModalVisible" class="modal" @click="isModalVisible=false">
+            <img :src="editForm.prodImg" alt="大图" class="large-image" />
+          </div>
+        </el-form-item>
+
         <el-form-item label="预警值" prop="code">
           <el-input size="small" v-model="editForm.alarmValue" auto-complete="off" placeholder="请输入商品预警值"></el-input>
         </el-form-item>
@@ -212,7 +259,6 @@
 
       </el-form>
 
-
       <el-table
         size="small"
         :data="imageListData"
@@ -236,10 +282,27 @@
       </div>
     </el-dialog>
 
-  </div>
 
+<!--    图片上传-->
 
+    <!-- 大图模态框 -->
+<!--    <div v-if="isModalVisible" class="modal" @click="closeModal">-->
+<!--      <div class="modal-content" @click.stop>-->
+<!--        <img :src="currentImage" alt="大图" class="large-image" />-->
+<!--      </div>-->
+<!--    </div>-->
 
+    <div v-if="isModalVisible" class="modal" @click="closeModal">
+      <div class="modal-content" @click.stop>
+        <img :src="currentImage" alt="大图" class="large-image" />
+        <div class="image-controls">
+          <button @click="prevImage" class="control-btn">上一张</button>
+          <button @click="nextImage" class="control-btn">下一张</button>
+        </div>
+      </div>
+    </div>
+
+</div>
 </template>
 <script>
 
@@ -250,15 +313,23 @@ import {
   prodDownload,
   prodDetailSave,
   ulrParse,
-  sendDataToBackend
+  sendDataToBackend, uploadImage
 } from '../../api/prodMG'
 import Pagination from '../../components/Pagination'
 import {timestampToTime} from "../../utils/util";
 export default {
   data() {
     return {
-      imageListData:[
-      ],
+      currentImageIndex: 0, // 当前大图索引
+      currentImage:'',
+      //控制模态框
+      isModalVisible: false,
+
+      showDelete: false,
+
+      uploadImageUrl:'',  //上传图片的url
+
+      imageListData:[],   //用于条形码扫描时显示的
 
       imageFormVisible:false,
       imageEditForm:{
@@ -274,9 +345,6 @@ export default {
       imageUrl: '',       // 输入的图片URL
 
 
-      // ==== 新增 ====
-      scanCode: '', // 绑定扫码输入框的值
-      scannedItems: [], // 存储已扫描的商品列表
       prodEditFormVisible:false,
       nshow: true, //switch开启
       fshow: false, //switch关闭
@@ -303,6 +371,7 @@ export default {
         unit: '',
         localtion: '',
         alarmValue: '',
+        prodImg:'',
         type: '',
         img: '',
         token: localStorage.getItem('logintoken')
@@ -363,6 +432,72 @@ export default {
   methods: {
     prodDownload,
     timestampToTime,
+    prevImage() {
+      // 切换到上一张图片
+      if (this.currentImageIndex > 0) {
+        this.currentImageIndex--;
+        this.currentImage = this.listData[this.currentImageIndex].prodImg;
+      }
+    },
+    nextImage() {
+      // 切换到下一张图片
+      if (this.currentImageIndex < this.listData.length - 1) {
+        this.currentImageIndex++;
+        this.currentImage = this.listData[this.currentImageIndex].prodImg;
+      }
+    },
+
+    //控制大图显示
+    showLargeImage(image) {
+      // 打开模态框并设置当前大图
+      this.currentImage = image;
+      this.isModalVisible = true;
+    },
+    closeModal() {
+      // 关闭模态框
+      this.isModalVisible = false;
+    },
+
+    deleteImage() {
+      // 删除图片
+      this.uploadImageUrl = '';
+      this.editForm.prodImg=''
+      // 清空文件输入框的值，确保可以重新上传
+      this.$refs.fileInput.value = null;
+    },
+
+    triggerUpload() {
+      console.log("文件选择器")
+      // 触发文件选择器
+      this.$refs.fileInput.click();
+    },
+    async uploadImage(event) {
+      const file = event.target.files[0];
+      if (!file) {
+        alert('请选择一张图片！');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      uploadImage(formData).then(res=>{
+        if(res.success){
+          this.$message("图片上传成功")
+          this.uploadImageUrl=res.data
+          this.editForm.prodImg=res.data
+        }
+      })
+
+    },
+
+    //播放
+    playSound(soundFile) {
+      const audio = new Audio(require(`@/assets/mp3/${soundFile}`));
+      audio.play().catch(error => {
+        console.error('播放音频失败:', error);
+      });
+    },
 
     //关闭条形码那个接口
     closeImage(){
@@ -391,6 +526,10 @@ export default {
               this.imageListData.push(res.data)
             }
             this.imageEditForm.barcodeResult = ''
+            if(this.imageEditForm.inOrOut==='出库')
+              this.playSound('入库成功.mp3')
+            else
+              this.playSound('出库成功.mp3')
           }else {
             this.$message(res.msg)
           }
@@ -512,10 +651,11 @@ export default {
         this.editForm.name = row.name
         this.editForm.code = row.code
         this.editForm.unit=row.unit
-
+        this.editForm.prodImg=row.prodImg
         this.editForm.type = row.type
         this.editForm.localtion=row.localtion
         this.editForm.alarmValue=row.alarmValue
+        this.editForm.img=row.img
 
       } else {
         this.title = '添加'
@@ -526,6 +666,7 @@ export default {
         this.editForm.alarmValue=''
         this.editForm.type=''
         this.editForm.unit=''
+        this.editForm.prodImg=''
         this.editForm.localtion=''
       }
     },
@@ -558,7 +699,10 @@ export default {
                   type: 'success',
                   message: '库存信息保存成功！'
                 })
-                this.scannedItems = []; // 清空列表
+                if(this.prodEditForm.inOrOut==='入库')
+                  this.playSound('入库成功.mp3')
+                else
+                  this.playSound('出库成功.mp3')
               } else {
                 this.getdata(this.formInline)
                 this.$message({
@@ -594,6 +738,7 @@ export default {
                   message: '公司保存成功！'
                 })
               } else {
+                this.getdata(this.formInline)
                 this.$message({
                   type: 'info',
                   message: res.msg
@@ -645,11 +790,10 @@ export default {
           })
         })
     },
-    // 关闭编辑、增加弹出框
-    closeDialog() {
-      this.editFormVisible = false
-      this.scannedItems = [];
-      this.scanCode = '';
+    closeDialog(){
+      this.prodEditFormVisible=false;
+      this.editFormVisible=false
+      this.mageFormVisible=false
     }
   }
 }
@@ -672,6 +816,82 @@ export default {
   right: 20px; /* 距离右侧的距离 */
   display: flex;
   gap: 10px; /* 按钮之间的间距 */
+}
+.upload-button {
+  width: 100px;
+  height: 100px;
+  font-size: 24px;
+  background-color: transparent; /* 背景透明 */
+  color: #007bff; /* 字体颜色 */
+  border: 2px solid #007bff; /* 边框颜色 */
+  border-radius: 5px; /* 边框圆角 */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none; /* 去掉默认的焦点边框 */
+}
+.upload-button:hover {
+  border-color: #0056b3; /* 鼠标悬停时的边框颜色 */
+  color: #0056b3; /* 鼠标悬停时的字体颜色 */
+}
+
+.delete-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  color: red;
+  font-size: 14px;
+  padding: 5px;
+  cursor: pointer;
+  border-radius: 5px 0 0 5px;
+}
+
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center; /* 垂直居中 */
+  justify-content: center; /* 水平居中 */
+  z-index: 999;
+  padding: 20px;
+}
+
+.large-image {
+  max-width: 90%; /* 确保图片在窗口内 */
+  max-height: 90%; /* 限制图片最大高度 */
+  object-fit: contain; /* 确保图片比例不失真 */
+}
+
+.my-button{
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 0, 0, 0.7);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+
+}
+.control-btn {
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.control-btn:hover {
+  background-color: rgba(0, 0, 0, 0.7);
 }
 </style>
 

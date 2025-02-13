@@ -21,3 +21,5 @@ export const ulrParse = (params) => { return axios.get("/api/Prod/parse?imageUrl
 
 //按下回车往后端发送数据
 export const sendDataToBackend = (params) => { return req("post", "/api/ProdDetail/barcodeAdd", params) };
+//实现图片上传功能
+export const uploadImage = (params) => { return req("post", "/api/common/uploadImage", params) };
