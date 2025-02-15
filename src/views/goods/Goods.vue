@@ -527,9 +527,9 @@ export default {
             }
             this.imageEditForm.barcodeResult = ''
             if(this.imageEditForm.inOrOut==='出库')
-              this.playSound('入库成功.mp3')
-            else
               this.playSound('出库成功.mp3')
+            else
+              this.playSound('入库成功.mp3')
           }else {
             this.$message(res.msg)
           }
