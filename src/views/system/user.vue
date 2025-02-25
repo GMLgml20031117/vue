@@ -26,7 +26,7 @@
       <el-form-item>
         <el-button size="small" type="primary" icon="el-icon-search" @click="search">搜索</el-button>
         <el-button size="small" type="primary" icon="el-icon-plus" @click="handleEdit()">添加</el-button>
-        <el-button size="small" type="primary" @click="handleunit()">部门设置</el-button>
+<!--        <el-button size="small" type="primary" @click="handleunit()">部门设置</el-button>-->
       </el-form-item>
     </el-form>
     <!--列表-->
@@ -63,7 +63,7 @@
           <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
           <el-button size="mini" type="danger" @click="deleteUser(scope.$index, scope.row)">删除</el-button>
           <el-button size="mini" type="success" @click="resetpwd(scope.$index, scope.row)">重置密码</el-button>
-          <el-button size="mini" type="success" @click="dataAccess(scope.$index, scope.row)">数据权限</el-button>
+<!--          <el-button size="mini" type="success" @click="dataAccess(scope.$index, scope.row)">数据权限</el-button>-->
 <!--          <el-button size="mini" type="success" @click="offlineUser(scope.$index, scope.row)">下线</el-button>-->
 <!--          <el-button size="mini" type="success" @click="refreshCache(scope.$index, scope.row)">刷新缓存</el-button>-->
         </template>
@@ -118,15 +118,7 @@
         <el-button size="small" type="primary" :loading="loading" class="title" @click="submitForm('editForm')">保存</el-button>
       </div>
     </el-dialog>
-    <!-- 数据权限 -->
-    <el-dialog title="数据权限" :visible.sync="dataAccessshow" width="30%" @click='closeDialog("perm")'>
-      <el-tree ref="tree" default-expand-all="" :data="UserDept" :props="defaultProps" :default-checked-keys="checkmenu" node-key="id" show-checkbox>
-      </el-tree>
-      <div slot="footer" class="dialog-footer">
-        <el-button size="small" @click='closeDialog("perm")'>取消</el-button>
-        <el-button size="small" type="primary" :loading="loading" class="title" @click="menuPermSave">保存</el-button>
-      </div>
-    </el-dialog>
+
     <!-- 所属单位 -->
     <el-dialog title="所属单位" :visible.sync="unitAccessshow" width="30%" @click='closeDialog("unit")'>
       <el-tree ref="tree" default-expand-all="" :data="UserDept" :props="defaultProps" @check-change="handleClick" :default-checked-keys="checkmenu" node-key="id" show-checkbox check-strictly>

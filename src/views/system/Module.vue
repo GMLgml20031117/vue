@@ -14,12 +14,12 @@
       <div class="modt-box">用户管理</div>
       <el-col :span="4"> </el-col>
       <el-col :span="6">
-        <div class="mod-btnbox">
-          <el-button size="small" type="primary">全部展开</el-button>
-          <el-button size="small" type="primary">全部压缩</el-button>
-        </div>
+<!--        <div class="mod-btnbox">-->
+<!--          <el-button size="small" type="primary">全部展开</el-button>-->
+<!--          <el-button size="small" type="primary">全部压缩</el-button>-->
+<!--        </div>-->
         <el-tree class="treeclass" ref="tree" :data="treeData" default-expand-all="" :props="defaultProps"
-                 @node-click="nodeclick" @check-change="handleClick" check-strictly node-key="id" show-checkbox></el-tree>
+                 @node-click="nodeclick" @check-change="handleClick" check-strictly node-key="menuid" show-checkbox></el-tree>
       </el-col>
       <el-col :span="18">
         <div class="mod-btnbox">
@@ -67,8 +67,8 @@ export default {
       showdelete: false,
       treeData: [],
       defaultProps: {
-        children: 'children',
-        label: 'name'
+        children: 'menus',
+        label: 'menuname'
       },
       form: {
         addUser: '',
@@ -124,58 +124,7 @@ export default {
     getdata() {
       ModuleList()
         .then(res => {
-          // this.treeData= [{
-          //   id: 1,
-          //   name: '一级 1',
-          //   children: [{
-          //     id: 4,
-          //     name: '二级 1-1',
-          //     children: [{
-          //       id: 9,
-          //       name: '三级 1-1-1'
-          //     }, {
-          //       id: 10,
-          //       name: '三级 1-1-2'
-          //     }]
-          //   }]
-          // }, {
-          //   id: 2,
-          //   name: '一级 2',
-          //   children: [{
-          //     id: 5,
-          //     name: '二级 2-1'
-          //   }, {
-          //     id: 6,
-          //     name: '二级 2-2'
-          //   }]
-          // }, {
-          //   id: 3,
-          //   label: '一级 3',
-          //   children: [{
-          //     id: 7,
-          //     name: '二级 3-1'
-          //   }, {
-          //     id: 8,
-          //     name: '二级 3-2'
-          //   }]
-          // }]
           this.treeData=res.data
-          // this.treeData = [
-          //   {
-          //     id: 1,
-          //     pId: 0,
-          //     name: '平台顶级',
-          //     open: true,
-          //     checked: true
-          //   },
-          //   {
-          //     id: 7,
-          //     pId: 2,
-          //     name: '一层',
-          //     open: true,
-          //     checked: false
-          //   }
-          // ]
         })
         .catch(err => {
           this.loading = false
@@ -227,7 +176,7 @@ export default {
     },
     // 点击节点
     nodeclick(arr, node, self) {
-      ModuleGet(arr.id)
+      ModuleGet(arr.menuid)
         .then(res => {
           console.log(JSON.stringify(res))
           this.form = res.data.data

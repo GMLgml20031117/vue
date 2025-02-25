@@ -9,11 +9,11 @@
         <el-input type="password" v-model="ruleForm.password" auto-complete="off" placeholder="密码"></el-input>
       </el-form-item>
       <el-row>
-        <el-col :span="12">
-          <el-form-item prop="code">
-            <el-input type="text" v-model="ruleForm.code" auto-complete="off" placeholder="图形验证码" @keyup.enter.native="submitForm('ruleForm')"></el-input>
-          </el-form-item>
-        </el-col>
+<!--        <el-col :span="12">-->
+<!--          <el-form-item prop="code">-->
+<!--            <el-input type="text" v-model="ruleForm.code" auto-complete="off" placeholder="图形验证码" @keyup.enter.native="submitForm('ruleForm')"></el-input>-->
+<!--          </el-form-item>-->
+<!--        </el-col>-->
         <el-col :span="12" class="code-box">
           <img :src="ruleForm.codeimg" alt="" class="codeimg" @click="getcode()">
         </el-col>

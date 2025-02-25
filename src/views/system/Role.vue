@@ -67,7 +67,7 @@
     </el-dialog>
     <!-- 菜单权限 -->
     <el-dialog title="菜单权限" :visible.sync="menuAccessshow" width="30%" @click='closeDialog("perm")'>
-      <el-tree ref="tree" default-expand-all="" :data="RoleRight" :props="RoleRightProps" :default-checked-keys="checkmenu" node-key="id" show-checkbox>
+      <el-tree ref="tree" default-expand-all=""  :check-strictly="true" :data="RoleRight" :props="RoleRightProps" :default-checked-keys="checkmenu" node-key="menuid" show-checkbox>
       </el-tree>
       <div slot="footer" class="dialog-footer">
         <el-button size="small" @click='closeDialog("perm")'>取消</el-button>
@@ -132,8 +132,8 @@ export default {
       // 数据权限
       RoleRight: [],
       RoleRightProps: {
-        children: 'children',
-        label: 'name'
+        children: 'menus',
+        label: 'menuname'
       },
       // 选中
       checkmenu: [],
@@ -301,9 +301,10 @@ export default {
               type: 'success',
               message: '获取权限成功'
             })
-            this.changemenu(res.data.data)
+            this.changemenu(res.data.data.list)
             console.log(res.data.data)
-            this.RoleRight = this.changeArr(res.data.data)
+            this.RoleRight=res.data.data.data
+            // this.RoleRight = this.changeArr(res.data.data)
           } else {
             this.$message({
               type: 'info',
@@ -320,11 +321,10 @@ export default {
     changemenu(arr) {
       let change = []
       for (let i = 0; i < arr.length; i++) {
-        if (arr[i].checked) {
-          change.push(arr[i].id)
-        }
+          change.push(arr[i].menuId)
       }
       this.checkmenu = change
+      console.log(this.checkmenu)
     },
     // tree 递归
     changeArr(list) {
@@ -372,15 +372,15 @@ export default {
     menuPermSave() {
       let parm = {
         roleId: this.saveroleId,
-        moduleIds: ''
+        menuIds: ''
       }
       let node = this.$refs.tree.getCheckedNodes()
-      let moduleIds = []
+      let menuIds = []
       if (node.length != 0) {
         for (let i = 0; i < node.length; i++) {
-          moduleIds.push(node[i].id)
+          menuIds.push(node[i].menuid)
         }
-        parm.moduleIds = JSON.stringify(moduleIds)
+        parm.menuIds = JSON.stringify(menuIds)
       }
       RoleRightSave(parm)
         .then(res => {
