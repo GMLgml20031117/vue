@@ -320,6 +320,13 @@ import {timestampToTime} from "../../utils/util";
 export default {
   data() {
     return {
+      //2025/2/26新增扫码枪数据
+      lastTime:'',
+      nextCode:'',
+      code:'',
+      lastCode:'',
+
+
       currentImageIndex: 0, // 当前大图索引
       currentImage:'',
       //控制模态框
@@ -420,16 +427,83 @@ export default {
   created() {
     this.getdata(this.formInline)
     document.addEventListener('keydown',this.handleKeydown)
+
+
+    //添加扫码枪操作
+    window.document.onkeypress = (e) => {
+      if (window.event) { // IE
+        this.nextCode = e.keyCode
+      } else if (e.which) { // Netscape/Firefox/Opera
+        this.nextCode = e.which
+      }
+      // console.log(e.which)
+      // console.log(this.row)
+      console.log("-------------")
+      if (e.which === 13) { // 键盘回车事件
+        console.log(this.code.length)
+        if(this.code.length == 0){
+          console.log(this.code)
+          this.parseQRCode(this.code) // 获取到扫码枪输入的内容，做别的操作
+          this.lastCode = ''
+          this.lastTime = ''
+          return
+        }//新加的需要删除掉的
+        if (this.code.length < 3) return // 扫码枪的速度很快，手动输入的时间不会让code的长度大于2，所以这里不会对扫码枪有效
+        console.log('扫码结束。')
+        console.log('条形码：', this.code)
+        this.parseQRCode(this.code) // 获取到扫码枪输入的内容，做别的操作
+        this.lastCode = ''
+        this.lastTime = ''
+        return
+      }
+
+      this.nextTime = new Date().getTime()
+      if (!this.lastTime && !this.lastCode) {
+        this.code = '' // 清空上次的条形码
+        this.code += e.key
+        console.log('扫码开始---', this.code)
+      }
+      if (this.lastCode && this.lastTime && this.nextTime - this.lastTime > 500) { // 当扫码前有keypress事件时,防止首字缺失
+        this.code = e.key
+        console.log('防止首字缺失。。。', this.code)
+      } else if (this.lastCode && this.lastTime) {
+        this.code += e.key
+        console.log('扫码中。。。', this.code)
+      }
+      this.lastCode = this.nextCode
+      this.lastTime = this.nextTime
+    }
+
+
   },
   beforeDestroy() {
     // 在组件销毁时移除键盘事件监听
     document.removeEventListener('keydown', this.handleKeydown);
   },
 
+
+
   /**
    * 里面的方法只有被调用才会执行
    */
   methods: {
+
+    //2025/2/26新加扫码枪工作
+    parseQRCode(code) {
+
+      //这里可以去加一些判断验证码长度的代码
+      if (code.length === 0) {
+        // 处理自己的逻辑
+        console.log('请输入条码！')
+      } else {
+        let codeParams = {
+          codeParam:code
+        }
+        //这里写请求后端的接口，去获取信息展示在table 中
+      }
+      this.codeValue = code
+    },
+
     prodDownload,
     timestampToTime,
     prevImage() {
@@ -527,9 +601,9 @@ export default {
             }
             this.imageEditForm.barcodeResult = ''
             if(this.imageEditForm.inOrOut==='出库')
-              this.playSound('出库成功.mp3')
-            else
               this.playSound('入库成功.mp3')
+            else
+              this.playSound('出库成功.mp3')
           }else {
             this.$message(res.msg)
           }
