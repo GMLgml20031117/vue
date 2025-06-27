@@ -82,9 +82,10 @@ export const deptDelete = (params) => { return axios.get("/api/Dept/delete?ids="
 // 系统环境变量-获取系统环境变量列表
 export const variableList = (params) => { return req("post", "/api/Variable/list", params) };
 // 系统环境变量-保存（添加编辑）
-export const variableSave = (params) => { return req("post", "/api/Variable/save", params) };
+export const variableSave = (params) => { return req("post", "/api/Variable/refresh", params) };
 // 系统环境变量-删除系统环境变量
 export const variableDelete = (params) => { return axios.delete("/api/Variable/delete?ids=" + params + "&token=" + localStorage.getItem('logintoken')).then(res => res.data) };
+
 
 /**
  * 权限管理

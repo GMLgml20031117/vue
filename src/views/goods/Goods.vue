@@ -624,7 +624,7 @@ export default {
         try {
           const response = await this.$axios({
             method: 'get',
-            url: '/api/ProdDetail/download?token' + localStorage.getItem('logintoken'),
+            url: '/api/ProdDetail/download?token=' + localStorage.getItem('logintoken'),
             responseType: 'blob', // 关键：指定响应类型为二进制流
           });
 

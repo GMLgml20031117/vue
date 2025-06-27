@@ -11,10 +11,10 @@
     <!-- 搜索筛选 -->
     <el-form :inline="true" :model="formInline" class="user-search">
       <el-form-item label="搜索：">
-        <el-input size="small" v-model="formInline.deptName" placeholder="输入部门名称"></el-input>
+        <el-input size="small" v-model="formInline.deptName" placeholder="输入公司名称"></el-input>
       </el-form-item>
       <el-form-item label="">
-        <el-input size="small" v-model="formInline.deptNo" placeholder="输入部门代码"></el-input>
+        <el-input size="small" v-model="formInline.deptNo" placeholder="输入公司代码"></el-input>
       </el-form-item>
       <el-form-item>
         <el-button size="small" type="primary" icon="el-icon-search" @click="search">搜索</el-button>
@@ -25,9 +25,9 @@
     <el-table size="small" :data="listData" highlight-current-row v-loading="loading" border element-loading-text="拼命加载中" style="width: 100%;">
       <el-table-column align="center" type="selection" width="60">
       </el-table-column>
-      <el-table-column sortable prop="deptName" label="部门名称" width="300">
+      <el-table-column sortable prop="deptName" label="公司名称" width="300">
       </el-table-column>
-      <el-table-column sortable prop="deptNo" label="部门代码" width="300">
+      <el-table-column sortable prop="deptNo" label="公司代码" width="300">
       </el-table-column>
       <el-table-column sortable prop="editTime" label="修改时间" width="300">
         <template slot-scope="scope">
@@ -48,11 +48,11 @@
     <!-- 编辑界面 -->
     <el-dialog :title="title" :visible.sync="editFormVisible" width="30%" @click="closeDialog">
       <el-form label-width="120px" :model="editForm" :rules="rules" ref="editForm">
-        <el-form-item label="部门名称" prop="deptName">
-          <el-input size="small" v-model="editForm.deptName" auto-complete="off" placeholder="请输入部门名称"></el-input>
+        <el-form-item label="公司名称" prop="deptName">
+          <el-input size="small" v-model="editForm.deptName" auto-complete="off" placeholder="请输入公司名称"></el-input>
         </el-form-item>
-        <el-form-item label="部门代码" prop="deptNo">
-          <el-input size="small" v-model="editForm.deptNo" auto-complete="off" placeholder="请输入部门代码"></el-input>
+        <el-form-item label="公司代码" prop="deptNo">
+          <el-input size="small" v-model="editForm.deptNo" auto-complete="off" placeholder="请输入公司代码"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -83,9 +83,9 @@ export default {
       // rules表单验证
       rules: {
         deptName: [
-          { required: true, message: '请输入部门名称', trigger: 'blur' }
+          { required: true, message: '请输入公司名称', trigger: 'blur' }
         ],
-        deptNo: [{ required: true, message: '请输入部门代码', trigger: 'blur' }]
+        deptNo: [{ required: true, message: '请输入公司代码', trigger: 'blur' }]
       },
       formInline: {
         page: 1,
@@ -94,7 +94,7 @@ export default {
         deptName: '',
         token: localStorage.getItem('logintoken')
       },
-      // 删除部门
+      // 删除公司
       seletedata: {
         ids: '',
         token: localStorage.getItem('logintoken')

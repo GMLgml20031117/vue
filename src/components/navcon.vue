@@ -1,6 +1,6 @@
 /**
 * 头部菜单
-*/ 
+*/
 <template>
   <el-menu class="el-menu-demo" mode="horizontal" background-color="#334157" text-color="#fff" active-text-color="#fff">
     <el-button class="buttonimg">
@@ -16,7 +16,7 @@
   </el-menu>
 </template>
 <script>
-import { loginout } from '../api/userMG'
+import {deptList, loginout} from '../api/userMG'
 export default {
   name: 'navcon',
   data() {
@@ -40,6 +40,10 @@ export default {
         type: 'warning'
       })
         .then(() => {
+          loginout()
+            .then(res => {
+
+            })
           setTimeout(() => {
             this.$store.commit('logout', 'false')
             this.$router.push({ path: '/login' })
@@ -48,30 +52,6 @@ export default {
               message: '已退出登录!'
             })
           }, 1000)
-          // loginout()
-          //   .then(res => {
-          //     if (res.success) {
-          //       //如果请求成功就让他2秒跳转路由
-          //       setTimeout(() => {
-          //         this.$store.commit('logout', 'false')
-          //         this.$router.push({ path: '/login' })
-          //         this.$message({
-          //           type: 'success',
-          //           message: '已退出登录!'
-          //         })
-          //       }, 1000)
-          //     } else {
-          //       this.$message.error(res.msg)
-          //       this.logining = false
-          //       return false
-          //     }
-          //   })
-          //   .catch(err => {
-          //     // 获取图形验证码
-          //     this.getcode()
-          //     this.logining = false
-          //     this.$message.error('退出失败，请稍后再试！')
-          //   })
         })
         .catch(() => {
           this.$message({

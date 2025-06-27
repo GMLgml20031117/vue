@@ -43,27 +43,18 @@ export default {
         password: '',
         code: '',
         randomStr: '',
-        codeimg: ''
       },
       //rules前端验证
       rules: {
         username: [{ required: true, message: '请输入账号', trigger: 'blur' }],
         password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
-        code: [{ required: true, message: '请输入验证码', trigger: 'blur' }]
       }
     }
   },
   // 创建完毕状态(里面是操作)
   created() {
-    this.$message({
-      message: '账号密码及验证码不为空即可',
-      type: 'success'
-    })
-    // 获取图形验证码
-    this.getcode()
     // 获取存在本地的用户名密码
     this.getuserpwd()
-
   },
   // 里面的函数只有调用才会执行
   methods: {
@@ -84,7 +75,7 @@ export default {
           // setTimeout(() => {
           //   this.logining = false
           //   this.$store.commit('login', 'true')
-          //   this.$router.push({ path: '/goods/Goods' })
+          //   this.$router.push({ path: '/system/user' })
           // })
           // 注释
           login(this.ruleForm).then(res => {
@@ -113,7 +104,7 @@ export default {
                 // 缓存用户个人信息
                 localStorage.setItem('userdata', JSON.stringify(res.data))
                 this.$store.commit('login', 'true')
-                this.$router.push({ path: '/goods/Goods' })
+                this.$router.push({ path: '/system/user' })
               })
             } else {
               this.$message.error(res.msg)

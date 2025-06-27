@@ -12,7 +12,7 @@
     <el-form :inline="true" :model="formInline" class="user-search">
 
       <el-form-item label="搜索：">
-        <el-input size="small" v-model="formInline.varLable" placeholder="输入变量描述"></el-input>
+        <el-input size="small" v-model="formInline.varLabel" placeholder="输入变量描述"></el-input>
       </el-form-item>
       <el-form-item label="">
         <el-input size="small" v-model="formInline.varName" placeholder="输入变量名称"></el-input>
@@ -26,18 +26,11 @@
     <el-table size="small" :data="listData" highlight-current-row v-loading="loading" border element-loading-text="拼命加载中" style="width: 100%;">
       <el-table-column align="center" type="selection" width="60">
       </el-table-column>
-      <el-table-column sortable prop="varLable" label="变量描述" width="200">
+      <el-table-column sortable prop="varLabel" label="变量描述" width="200">
       </el-table-column>
       <el-table-column sortable prop="varName" label="变量名称" width="200">
       </el-table-column>
       <el-table-column sortable prop="varValue" label="变量名称" width="300">
-      </el-table-column>
-      <el-table-column sortable prop="editTime" label="修改时间" width="200">
-        <template slot-scope="scope">
-          <div>{{scope.row.editTime|timestampToTime}}</div>
-        </template>
-      </el-table-column>
-      <el-table-column sortable prop="editUser" label="修改人" width="200">
       </el-table-column>
       <el-table-column align="center" label="操作" min-width="300">
         <template slot-scope="scope">
@@ -51,14 +44,21 @@
     <!-- 编辑界面 -->
     <el-dialog title="修改" :visible.sync="editFormVisible" width="30%" @click="closeDialog">
       <el-form label-width="120px" :model="editForm" :rules="rules" ref="editForm">
-        <el-form-item label="变量描述" prop="varLable">
-          <el-input size="small" v-model="editForm.varLable" auto-complete="off" placeholder="变量描述"></el-input>
+        <el-form-item label="变量描述" prop="varLabel">
+          <el-input size="small" v-model="editForm.varLabel" auto-complete="off" placeholder="变量描述"></el-input>
         </el-form-item>
         <el-form-item label="变量名称" prop="varName">
           <el-input size="small" v-model="editForm.varName" auto-complete="off" placeholder="变量名称"></el-input>
         </el-form-item>
-        <el-form-item label="变量名称" prop="varValue">
-          <el-input size="small" v-model="editForm.varValue" auto-complete="off" placeholder="变量名称"></el-input>
+        <el-form-item label="变量值" prop="varValue">
+          <el-input
+            type="textarea"
+            :rows="10"
+            :clumn="10"
+            size="small"
+            v-model="editForm.varValue"
+            placeholder="变量值"
+          ></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -82,14 +82,14 @@ export default {
       title: '添加',
       editForm: {
         varId: '',
-        varLable: '',
+        varLabel: '',
         varName: '',
         varValue: '',
         token: localStorage.getItem('logintoken')
       },
       // rules表单验证
       rules: {
-        varLable: [
+        varLabel: [
           { required: true, message: '请输入变量描述', trigger: 'blur' }
         ],
         varName: [
@@ -102,7 +102,7 @@ export default {
       formInline: {
         page: 1,
         limit: 10,
-        varLable: '',
+        varLabel: '',
         varName: '',
         token: localStorage.getItem('logintoken')
       },
@@ -148,111 +148,45 @@ export default {
     getdata(parameter) {
       this.loading = true
       // 模拟数据
-      let res = {
-        code: 0,
-        msg: null,
-        count: 6,
-        data: [
-          {
-            addUser: 'root',
-            editUser: 'root',
-            addTime: 1519385529000,
-            editTime: 1520619747000,
-            varId: 190,
-            deptId: 1,
-            varLable: '支付访问域名',
-            varName: 'domainName',
-            varValue: 'http://127.0.0.1:8080/iot-service-pay'
-          },
-          {
-            addUser: 'root',
-            editUser: 'root',
-            addTime: 1519451541000,
-            editTime: 1519451547000,
-            varId: 191,
-            deptId: 1,
-            varLable: '商品图片地址',
-            varName: 'productImgURL',
-            varValue: 'http://ymwlw.com/pic'
-          },
-          {
-            addUser: 'root',
-            editUser: 'root',
-            addTime: 1519452658000,
-            editTime: 1519452661000,
-            varId: 192,
-            deptId: 1,
-            varLable: '手机支付广告地址',
-            varName: 'groupDomain',
-            varValue: 'http://ymwlwl.com'
-          },
-          {
-            addUser: null,
-            editUser: null,
-            addTime: 1519879624000,
-            editTime: 1519879628000,
-            varId: 193,
-            deptId: 1,
-            varLable: '下单接口测试模式',
-            varName: 'envType',
-            varValue: 'false'
-          },
-          {
-            addUser: null,
-            editUser: null,
-            addTime: 1526374014000,
-            editTime: 1526374031000,
-            varId: 198,
-            deptId: null,
-            varLable: 'sgh',
-            varName: 'jhjj',
-            varValue: 'jhjhgs'
-          },
-          {
-            addUser: null,
-            editUser: null,
-            addTime: 1526453243000,
-            editTime: 1526453243000,
-            varId: 199,
-            deptId: null,
-            varLable: 'v',
-            varName: 'v',
-            varValue: 'v'
-          }
-        ]
-      }
-      this.loading = false
-      this.listData = res.data
-      // 分页赋值
-      this.pageparm.currentPage = this.formInline.page
-      this.pageparm.pageSize = this.formInline.limit
-      this.pageparm.total = res.count
+      // let res = {
+      //   code: 0,
+      //   msg: null,
+      //   count: 6,
+      //   data: [
+      //   ]
+      // }
+      // this.loading = false
+      // this.listData = res.data
+      // // 分页赋值
+      // this.pageparm.currentPage = this.formInline.page
+      // this.pageparm.pageSize = this.formInline.limit
+      // this.pageparm.total = res.count
       // 模拟数据结束
 
       /***
        * 调用接口，注释上面模拟数据 取消下面注释
        */
-      // variableList(parameter)
-      //   .then(res => {
-      //     console.log(JSON.stringify(res))
-      //     this.loading = false
-      //     if (res.success == false) {
-      //       this.$message({
-      //         type: 'info',
-      //         message: res.msg
-      //       })
-      //     } else {
-      //       this.listData = res.data
-      //       // 分页赋值
-      //       this.pageparm.currentPage = this.formInline.page
-      //       this.pageparm.pageSize = this.formInline.limit
-      //       this.pageparm.total = res.count
-      //     }
-      //   })
-      //   .catch(err => {
-      //     this.loading = false
-      //     this.$message.error('菜单加载失败，请稍后再试！')
-      //   })
+      variableList(parameter)
+        .then(res => {
+          console.log(JSON.stringify(res))
+          this.loading = false
+          if (res.success == false) {
+            this.$message({
+              type: 'info',
+              message: res.msg
+            })
+          } else {
+            this.listData = res.data
+            // 分页赋值
+            this.pageparm.currentPage = this.formInline.page
+            this.pageparm.pageSize = this.formInline.limit
+            this.pageparm.total = res.count
+          }
+        })
+        .catch(err => {
+          this.loading = false
+          this.$message.error('菜单加载失败，请稍后再试！')
+        })
     },
     // 分页插件事件
     callFather(parm) {
@@ -270,13 +204,13 @@ export default {
       if (row != undefined && row != 'undefined') {
         this.title = '修改'
         this.editForm.varId = row.varId
-        this.editForm.varLable = row.varLable
+        this.editForm.varLabel = row.varLabel
         this.editForm.varName = row.varName
         this.editForm.varValue = row.varValue
       } else {
         this.title = '添加'
         this.editForm.varId = ''
-        this.editForm.varLable = ''
+        this.editForm.varLabel = ''
         this.editForm.varName = ''
         this.editForm.varValue = ''
       }
@@ -364,4 +298,3 @@ export default {
 }
 </style>
 
- 
